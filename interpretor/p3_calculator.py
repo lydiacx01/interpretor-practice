@@ -108,31 +108,28 @@ class Interpretor(object):
 
     # get next pos of string and format as a token
     def _get_next_token(self):
-        if (self.pos >= len(self.text)):
-            self.error()
-        else:
+        if (self.current is not None):
             self._skip_whitespace()
             txt = self.current
             # end with whitespace
-            if (txt is None):
-                token = None
-            elif (txt.isdigit()):
+            if (txt.isdigit()):
                 token = self._int(txt)
             # operator like - + * /
             else:
                 token = self.operatorFactory.build(txt)
                 self._advance()
             self.token = token
+        else:
+            self.token = None
     
     
     def _eat(self, token_type):
-        if (self.token.type == token_type
+        if (self.token is not None 
+                and 
+                (self.token.type == token_type
                 or 
-                isinstance(self.token, token_type)):
-            if (self.current is not None):
+                isinstance(self.token, token_type))):
                 self._get_next_token()
-            else:
-                self.token = None
         else:
             self.error()
 
@@ -157,6 +154,8 @@ class Interpretor(object):
                 break
 
             self._eat(Operator)
+            if (self.token is None):
+                self.error()
             right = int(self.token.value)
             left = opt.run(left, right)
         return left
