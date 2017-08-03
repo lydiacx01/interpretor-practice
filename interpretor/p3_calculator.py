@@ -129,7 +129,10 @@ class Interpretor(object):
         if (self.token.type == token_type
                 or 
                 isinstance(self.token, token_type)):
-            self._get_next_token()
+            if (self.current is not None):
+                self._get_next_token()
+            else:
+                self.token = None
         else:
             self.error()
 
