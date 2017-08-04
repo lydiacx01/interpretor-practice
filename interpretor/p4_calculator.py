@@ -163,13 +163,13 @@ class Interpretor(object):
             self._eat(PRO_PLUS_MINUS)
             right = self._term()
 
-            if (self.current is None):
-                left = self._plus_minus_token_calc(opt, left, right)
-                break
-            else:
+            if (self.current is not None):
                 if (self._operator_check(PRO_MULTI_DIVID)):
                     right = self._multi_divid_handler(right)
-                left = self._plus_minus_token_calc(opt, left, right)
+            left = self._plus_minus_token_calc(opt, left, right)
+            if (self.current is None):
+                break
+        
         return left
 
     def _multi_divid_handler(self, left):
