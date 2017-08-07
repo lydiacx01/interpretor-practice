@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'整数的计算器，得到的结果是浮点值，四则运算（不带括号）'
+'整数的计算器，得到的结果是浮点值，四则运算, 允许带括号计算'
 
 __author__ = 'lydiacx_develop@outlook.com'
 
 '''
     BNF（巴科斯）范式定义语法如下：
-     factor: integer
+     factor: integer | LPAREN exp RPAREN
      term: factor((multi|divid)factor)*
      exp: term((plus|minus)term)*
 '''
 
-INTEGER, PLUS, MINUS, MULTI, DIVID, EOF = 'INTEGER', 'PLUS', 'MINUS', 'MULTI', 'DIVID', 'EOF'
+INTEGER, PLUS, MINUS, MULTI, DIVID, LPAREN, RPAREN, EOF = 'INTEGER', 'PLUS', 'MINUS', 'MULTI', 'DIVID', 'LPAREN', 'RPAREN', 'EOF'
 
 class Token(object):
     def __init__(self, type, value):
@@ -56,7 +56,7 @@ class Lexer(object):
     __repr__ = __str__
 
     def _error(self):
-        raise Exception('parsing error')
+        raise Exception('invalid character')
 
     # the pointer move advance a step, check whether it reached the end of text
     def _advance(self):
@@ -104,6 +104,12 @@ class Lexer(object):
             elif (t == '/'):
                 self._advance()
                 return Token(DIVID, t)
+            elif (t == '('):
+                self._advance()
+                return Token(LPAREN, t)
+            elif (t == ')'):
+                self._advance()
+                return Token(RPAREN, t)
             else:
                 self._error()
                 
@@ -125,7 +131,7 @@ class Interpretor(object):
 
 
     def _error(self):
-        raise Exception('interprete error')
+        raise Exception('invalid syntax')
         
     def _eat(self, tokenType):
         if (self.__currentToken.type == tokenType):
@@ -135,8 +141,16 @@ class Interpretor(object):
     
     def _factor(self):
         t = self.__currentToken
-        self._eat(INTEGER)
-        return t.value
+        if (t.type == INTEGER):  
+            self._eat(INTEGER)
+            return t.value
+        elif (t.type == LPAREN):
+            self._eat(LPAREN)
+            res = self.expr()
+            self._eat(RPAREN)
+            return res
+        else:
+            self.error()
 
     def _term(self):
         t = self._factor()
@@ -152,7 +166,7 @@ class Interpretor(object):
     def expr(self):
         t = self._term()
 
-        while(self.__currentToken.type is not EOF):
+        while(self.__currentToken.type in (PLUS, MINUS)):
             if (self.__currentToken.type == PLUS):
                 self._eat(PLUS)
                 t += self._term()
