@@ -1,7 +1,7 @@
 #empty statement#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'构造AST树，用interpretor后序遍历法（左-》右-》中顺序）计算树结果。整数的计算器，得到的结果是浮点值，四则运算, 允许带括号计算，允许单元运算，即:1+-2=-1,1++2=3'
+'构造AST树, 执行变量、赋值语句和begin end嵌套语句'
 
 __author__ = 'lydiacx_develop@outlook.com'
 
@@ -197,7 +197,7 @@ class Lexer(object):
     def _id(self):
         t = ''
         # 允许为字母或数字
-        while (self.__current is not None and self.__current.isalnum()):
+        while (self.__current is not None and (self.__current.isalnum() or self.__current == '_')):
             t += self.__current
             self._advance()
         #小写格式，进行精确匹配
@@ -217,7 +217,7 @@ class Lexer(object):
                 continue
             elif (t.isdigit()):
                 return self._integer()
-            elif (t.isalpha()):
+            elif (t.isalpha() or t == '_'):
                 return self._id()
             elif (t == '.'):
                 self._advance()
