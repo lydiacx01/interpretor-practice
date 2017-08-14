@@ -129,11 +129,13 @@ class AssignStatement(AST):
 
 
 class Compound(AST):
-    children = []
+    def __init__(self, children):
+        self.children = children
     def __str__(self):
-        return '(Compound (children = {t})'.format(
-            t = repr(self.children)
-            )
+       return '(Compound(children={t}))'.format(
+            t = self.children
+           )
+       
     __repr__ = __str__
 
 
@@ -282,9 +284,7 @@ class Parser(object):
         self._eat(BEGIN)
         res = self._statementList()
         self._eat(END)
-        r = Compound()
-        for n in res:
-            r.children.append(r)
+        r = Compound(res)
         return r
 
     def _statementList(self):
@@ -296,7 +296,6 @@ class Parser(object):
                 break
             else:
                 s.append(self._statement())
-                
         return s
 
     def _statement(self):
@@ -433,14 +432,13 @@ class Interpretor(object):
             return self._calcCompound(node)
         if (isinstance(node, AssignStatement)):
             return self._calcAssign(node)
-        
-        if (node.left is not None):
-            left = self.run(node.left)
-        if (node.right is not None):
-            right = self.run(node.right)
 
-        self._calcBinOp(left, node, right)
-        return self.buff
+        if (isinstance(node, BinOp)): 
+            if (node.left is not None):
+                left = self.run(node.left)
+            if (node.right is not None):
+                right = self.run(node.right)
+            return self._calcBinOp(left, node, right)
 
 
     
@@ -456,8 +454,8 @@ def test():
         lexer = Lexer(txt)
         ast = Parser(lexer).parse()
         itp = Interpretor()
-        res = itp.run(ast)
-        print('done! 此时的Buff={t}'.format(t=res))
+        itp.run(ast)
+        print('done! 此时的Buff={t}'.format(t=itp.buff))
 
 if __name__ == '__main__':
     test()
