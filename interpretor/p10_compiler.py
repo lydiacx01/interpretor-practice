@@ -238,7 +238,7 @@ class Lexer(object):
             t += self.__current
             self._advance()
         if (self.__current == '.'):
-            t += '.';
+            t += '.'
             self._advance()
             while (self.__current is not None and self.__current.isdigit()):
                 t += self.__current
@@ -350,7 +350,7 @@ class Parser(object):
     def parse(self):
         res = self._program()
         if (self.__currentToken.type != EOF):
-            self.error()
+            self._error()
         return res
 
     def _program(self):
@@ -401,7 +401,7 @@ class Parser(object):
         elif (t.type == REAL):
             self._eat(REAL)
         else:
-            self.error()
+            self._error()
         return VarType(t)
 
     def _compound(self):
@@ -456,7 +456,7 @@ class Parser(object):
             return Num(t)
         elif (t.type == LPAREN):
             self._eat(LPAREN)
-            res = self.expr()
+            res = self._expr()
             self._eat(RPAREN)
             return res
         elif (t.type == PLUS):
